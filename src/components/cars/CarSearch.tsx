@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,10 +13,12 @@ interface CarSearchProps {
   onFilterChange: (filteredCars: Car[]) => void;
 }
 
+const ALL_ITEMS_VALUE = "_ALL_"; // Define a constant for clarity
+
 const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState(''); // Initial empty string for placeholder behavior
+  const [selectedYear, setSelectedYear] = useState(''); // Initial empty string for placeholder behavior
 
   const teams = React.useMemo(() => Array.from(new Set(cars.map(car => car.team))).sort(), [cars]);
   const years = React.useMemo(() => Array.from(new Set(cars.map(car => car.year.toString()))).sort((a, b) => parseInt(b) - parseInt(a)), [cars]);
@@ -32,11 +35,11 @@ const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
       );
     }
 
-    if (selectedTeam) {
+    if (selectedTeam && selectedTeam !== ALL_ITEMS_VALUE) {
       filtered = filtered.filter(car => car.team === selectedTeam);
     }
 
-    if (selectedYear) {
+    if (selectedYear && selectedYear !== ALL_ITEMS_VALUE) {
       filtered = filtered.filter(car => car.year.toString() === selectedYear);
     }
 
@@ -45,11 +48,13 @@ const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
 
   const handleResetFilters = () => {
     setSearchTerm('');
-    setSelectedTeam('');
-    setSelectedYear('');
+    setSelectedTeam(''); // Reset to empty string to show placeholder
+    setSelectedYear(''); // Reset to empty string to show placeholder
   };
   
-  const hasActiveFilters = searchTerm || selectedTeam || selectedYear;
+  const hasActiveFilters = searchTerm || 
+                           (selectedTeam && selectedTeam !== ALL_ITEMS_VALUE) || 
+                           (selectedYear && selectedYear !== ALL_ITEMS_VALUE);
 
   return (
     <div className="mb-8 p-6 bg-card rounded-lg shadow-lg space-y-4 animate-fade-in">
@@ -71,12 +76,15 @@ const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
         
         <div className="space-y-1">
           <label htmlFor="team-filter" className="text-sm font-medium text-muted-foreground">Filter by Team</label>
-          <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+          <Select 
+            value={selectedTeam || ALL_ITEMS_VALUE} // Ensure _ALL_ is selected if state is '' after initial load or reset. The component's value itself can be '' for placeholder.
+            onValueChange={(value) => setSelectedTeam(value === ALL_ITEMS_VALUE ? '' : value)}
+          >
             <SelectTrigger id="team-filter" className="w-full">
               <SelectValue placeholder="All Teams" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Teams</SelectItem>
+              <SelectItem value={ALL_ITEMS_VALUE}>All Teams</SelectItem>
               {teams.map(team => (
                 <SelectItem key={team} value={team}>{team}</SelectItem>
               ))}
@@ -86,12 +94,15 @@ const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
 
         <div className="space-y-1">
           <label htmlFor="year-filter" className="text-sm font-medium text-muted-foreground">Filter by Year</label>
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <Select 
+            value={selectedYear || ALL_ITEMS_VALUE}
+            onValueChange={(value) => setSelectedYear(value === ALL_ITEMS_VALUE ? '' : value)}
+          >
             <SelectTrigger id="year-filter" className="w-full">
               <SelectValue placeholder="All Years" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Years</SelectItem>
+              <SelectItem value={ALL_ITEMS_VALUE}>All Years</SelectItem>
               {years.map(year => (
                 <SelectItem key={year} value={year}>{year}</SelectItem>
               ))}
@@ -112,3 +123,4 @@ const CarSearch: React.FC<CarSearchProps> = ({ cars, onFilterChange }) => {
 };
 
 export default CarSearch;
+
